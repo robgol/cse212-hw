@@ -47,7 +47,10 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3)
     // After running 5 times, add George with 3 turns.  Run until the queue is empty.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
-    // Defect(s) Found: 
+    // Defect(s) Found: This test exposed the same underlying defect as `TestTakingTurnsQueue_FiniteRepetition`
+    //                  regarding the incorrect turn decrementing logic. The faulty re-enqueuing behavior for individuals with 1 turn
+    //                  remaining resulted in an incorrect order of elements in the queue and ultimately an incorrect sequence of dequeued persons, failing the assertions.
+
     public void TestTakingTurnsQueue_AddPlayerMidway()
     {
         var bob = new Person("Bob", 2);
@@ -89,7 +92,11 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: While the "infinite turns" behavior for Tim (Turns = 0) correctly prevented his `Turns` 
+    //                  property from being modified due to the `person.Turns > 1` condition, the test still failed
+    //                  because of the incorrect re-enqueuing behavior for Bob and Sue, who have finite turns.
+    //                  The sequence of returned people was incorrect due to these related issues. The final assertion
+    //                  regarding `timTurns` correctly passed as its value was indeed unchanged.
     public void TestTakingTurnsQueue_ForeverZero()
     {
         var timTurns = 0;
@@ -120,7 +127,10 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Tim (Forever), Sue (3)
     // Run 10 times.
     // Expected Result: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: No direct defects were found with the handling of negative "infinite" turns (`timTurns = -3`). 
+    //                  The original code's `person.Turns > 1` condition correctly prevented modification of negative turn counts, 
+    //                  so Tim's turn count remained unchanged. However, the sequence of returned people was incorrect for Sue, 
+    //                  demonstrating the pervasive issue with handling finite turns, even when an infinite-turn person was present.
     public void TestTakingTurnsQueue_ForeverNegative()
     {
         var timTurns = -3;
@@ -147,7 +157,7 @@ public class TakingTurnsQueueTests
     [TestMethod]
     // Scenario: Try to get the next person from an empty queue
     // Expected Result: Exception should be thrown with appropriate error message.
-    // Defect(s) Found: 
+    // Defect(s) Found: None.
     public void TestTakingTurnsQueue_Empty()
     {
         var players = new TakingTurnsQueue();
