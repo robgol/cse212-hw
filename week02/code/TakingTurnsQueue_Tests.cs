@@ -11,7 +11,11 @@ public class TakingTurnsQueueTests
     // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3) and
     // run until the queue is empty
     // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
+    // Defect(s) Found: The original code's `GetNextPerson` method had a flaw in its turn decrementing logic.
+    //                   Specifically, for persons with a finite number of turns, the condition `person.Turns > 1` meant 
+    //                   that a person with exactly 1 turn left would not have their turns decremented and would be incorrectly
+    //                   re-enqueued, leading to an infinite loop for that person and an incorrect sequence of returned names.
+    //                   This test failed because Bob and Sue were not removed from the queue as expected.
     public void TestTakingTurnsQueue_FiniteRepetition()
     {
         var bob = new Person("Bob", 2);
